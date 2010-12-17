@@ -175,6 +175,29 @@ NSString* kDBProtocolHTTPS = @"https";
     }
 }
 
+- (void)loadPartialDataFromFile:(NSString *)path withRange:(NSRangePointer)range
+{
+    NSString* fullPath = [NSString stringWithFormat:@"/files/%@%@", root, path];
+    
+    NSMutableURLRequest* urlRequest = 
+	[self requestWithProtocol:kDBProtocolHTTPS host:kDBDropboxAPIContentHost path:fullPath parameters:nil];
+	
+	if (range) {
+		[urlRequest setValue:[NSString stringWithFormat:@"bytes=%ld-%ld", range->location, range->location + range->length] 
+		  forHTTPHeaderField:@"Range"];
+	}
+	
+    DBRequest* request = 
+	[[[DBRequest alloc] 
+	  initWithURLRequest:urlRequest andInformTarget:self selector:@selector(requestDidLoadPartialDataFromFile:)]
+	 autorelease];
+    request.downloadProgressSelector = @selector(requestLoadProgress:);
+    request.userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+						root, @"root", 
+						path, @"path", nil];
+    [loadRequests setObject:request forKey:path];	
+}
+
 - (void)loadPartialFile:(NSString *)path intoPath:(NSString *)destinationPath withRange:(NSRangePointer)range
 {
     NSString* fullPath = [NSString stringWithFormat:@"/files/%@%@", root, path];
@@ -263,7 +286,22 @@ contentType:(NSString*)contentType eTag:(NSString*)eTag {
     [loadRequests removeObjectForKey:path];
 }
 
-
+- (void)requestDidLoadPartialDataFromFile:(DBRequest*)request {
+	NSLog(@"Got partial data!");
+	NSString* path = [request.userInfo objectForKey:@"path"];
+	
+	if (request.error) {
+		NSLog(@"error!: %@", [request.error localizedDescription]);
+		[self checkForAuthenticationFailure:request];
+		if ([delegate respondsToSelector:@selector(restClient:loadFileFailedWithError:)]) {
+			[delegate restClient:self loadFileFailedWithError:request.error];
+		}
+	} else {
+		if ([delegate respondsToSelector:@selector(restClient:loadedData:fromPath:)]) {
+			[delegate restClient:self loadedData:request.resultData fromPath:path];
+		}
+	}
+}
 
 - (void)loadThumbnail:(NSString *)path ofSize:(NSString *)size intoPath:(NSString *)destinationPath 
 {

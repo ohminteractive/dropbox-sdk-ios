@@ -47,6 +47,9 @@ extern NSString* kDBProtocolHTTPS;
 /* Partially load the file i.e. only load bytes in the Range specified */
 - (void)loadPartialFile:(NSString *)path intoPath:(NSString *)destinationPath withRange:(NSRangePointer)range;
 
+/* Partially load the file, but don't store to local store, just pass it to our delegate with NSData instead */
+- (void)loadPartialDataFromFile:(NSString *)path withRange:(NSRangePointer)range;
+
 - (void)loadThumbnail:(NSString *)path ofSize:(NSString *)size intoPath:(NSString *)destinationPath;
 
 /* Uploads a file that will be named filename to the given root/path on the server. It will upload
@@ -99,6 +102,9 @@ extern NSString* kDBProtocolHTTPS;
 - (void)restClient:(DBRestClient*)client loadProgress:(CGFloat)progress forFile:(NSString*)destPath;
 - (void)restClient:(DBRestClient*)client loadFileFailedWithError:(NSError*)error;
 // [error userInfo] contains the destinationPath
+
+// Implement this callback to get your file data from loadPartialDataFromFile:withRange:
+- (void)restClient:(DBRestClient*)client loadedData:(NSData*)data fromPath:(NSString*)path;
 
 - (void)restClient:(DBRestClient*)client loadedThumbnail:(NSString*)destPath;
 - (void)restClient:(DBRestClient*)client loadThumbnailFailedWithError:(NSError*)error;
