@@ -44,6 +44,9 @@ extern NSString* kDBProtocolHTTPS;
 - (void)loadFile:(NSString *)path intoPath:(NSString *)destinationPath;
 - (void)cancelFileLoad:(NSString*)path;
 
+/* Partially load the file i.e. only load bytes in the Range specified */
+- (void)loadPartialFile:(NSString *)path intoPath:(NSString *)destinationPath withRange:(NSRangePointer)range;
+
 - (void)loadThumbnail:(NSString *)path ofSize:(NSString *)size intoPath:(NSString *)destinationPath;
 
 /* Uploads a file that will be named filename to the given root/path on the server. It will upload

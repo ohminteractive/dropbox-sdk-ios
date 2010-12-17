@@ -92,7 +92,7 @@ static id networkRequestDelegate = nil;
 - (void)connection:(NSURLConnection*)connection didReceiveResponse:(NSURLResponse*)aResponse {
     response = [(NSHTTPURLResponse*)aResponse retain];
     
-    if (resultFilename && [self statusCode] == 200) {
+    if (resultFilename && ([self statusCode] == 200 || [self statusCode] == 206)) {
         // Create the file here so it's created in case it's zero length
         // File is downloaded into a temporary file and then moved over when completed successfully
         NSString* filename = 
@@ -111,7 +111,7 @@ static id networkRequestDelegate = nil;
 }
 
 - (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)data {
-    if (resultFilename && [self statusCode] == 200) {
+    if (resultFilename && ([self statusCode] == 200 || [self statusCode] == 206)) {
         @try {
             [fileHandle writeData:data];
         } @catch (NSException* e) {
@@ -149,7 +149,7 @@ static id networkRequestDelegate = nil;
     [fileHandle release];
     fileHandle = nil;
     
-    if (self.statusCode != 200) {
+    if (!(self.statusCode == 200 || self.statusCode == 206)) {
         NSMutableDictionary* errorUserInfo = [NSMutableDictionary dictionaryWithDictionary:userInfo];
         // To get error userInfo, first try and make sense of the response as JSON, if that
         // fails then send back the string as an error message
