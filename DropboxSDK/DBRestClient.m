@@ -287,7 +287,6 @@ contentType:(NSString*)contentType eTag:(NSString*)eTag {
 }
 
 - (void)requestDidLoadPartialDataFromFile:(DBRequest*)request {
-	NSLog(@"Got partial data!");
 	NSString* path = [request.userInfo objectForKey:@"path"];
 	
 	if (request.error) {
