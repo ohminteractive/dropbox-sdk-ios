@@ -70,6 +70,8 @@ extern NSString* kDBProtocolHTTPS;
 - (void)createAccount:(NSString *)email password:(NSString *)password firstName:(NSString *)firstName 
         lastName:(NSString *)lastName;
 
+- (void)loadStreamingFile:(NSString *)path withRange:(NSRangePointer)range;
+
 @property (nonatomic, assign) id<DBRestClientDelegate> delegate;
 
 @end
@@ -141,6 +143,9 @@ forFile:(NSString*)destPath from:(NSString*)srcPath;
 
 - (void)restClientCreatedAccount:(DBRestClient*)client;
 - (void)restClient:(DBRestClient*)client createAccountFailedWithError:(NSError *)error;
+
+- (void)restClient:(DBRestClient*)client loadStreamingData:(NSData*)data forFile:(NSString*)file;
+- (void)restClient:(DBRestClient*)client streamingFileEOS:(NSString*)path;
 
 @end
 

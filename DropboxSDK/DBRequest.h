@@ -32,6 +32,9 @@
     CGFloat uploadProgress;
     NSMutableData* resultData;
     NSError* error;
+	
+	SEL streamingFileSelector;
+	NSData *streamingData;
 }
 
 /*  Set this to get called when _any_ request starts or stops. This should hook into whatever
@@ -59,6 +62,9 @@
 @property (nonatomic, readonly) NSString* resultString;
 @property (nonatomic, readonly) NSObject* resultJSON;
 @property (nonatomic, readonly) NSError* error;
+
+@property (nonatomic, readonly) NSData *streamingData;
+@property (nonatomic, assign) SEL streamingFileSelector;
 
 @end
 

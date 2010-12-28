@@ -229,6 +229,44 @@ NSString* kDBProtocolHTTPS = @"https";
 	[self loadPartialFile:path intoPath:destinationPath withRange:nil];
 }
 
+- (void)loadStreamingFile:(NSString *)path withRange:(NSRangePointer)range
+{
+    NSString* fullPath = [NSString stringWithFormat:@"/files/%@%@", root, path];
+    
+    NSMutableURLRequest* urlRequest = 
+	[self requestWithProtocol:kDBProtocolHTTPS host:kDBDropboxAPIContentHost path:fullPath parameters:nil];
+	
+	if (range) {
+		[urlRequest setValue:[NSString stringWithFormat:@"bytes=%ld-%ld", range->location, range->location + range->length] 
+		  forHTTPHeaderField:@"Range"];
+	}
+	
+    DBRequest* request = 
+	[[[DBRequest alloc] 
+	  initWithURLRequest:urlRequest andInformTarget:self selector:@selector(requestDidLoadStreamingFile:)]
+	 autorelease];
+    request.downloadProgressSelector = @selector(requestLoadProgress:);
+	request.streamingFileSelector = @selector(requestGotStreamingData:);
+    request.userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+						root, @"root", 
+						path, @"path",
+						nil];
+    [loadRequests setObject:request forKey:path];	
+}
+
+- (void)requestDidLoadStreamingFile:(DBRequest*)request
+{
+	if ([delegate respondsToSelector:@selector(restClient:streamingFileEOS:)]) {
+		[delegate restClient:self streamingFileEOS:[request.userInfo objectForKey:@"path"]];
+	}
+}
+
+- (void)requestGotStreamingData:(DBRequest*)request
+{
+	if ([delegate respondsToSelector:@selector(restClient:loadStreamingData:forFile:)]) {
+		[delegate restClient:self loadStreamingData:request.streamingData forFile:[request.userInfo objectForKey:@"path"]];
+	}
+}
 
 - (void)cancelFileLoad:(NSString*)path {
     DBRequest* outstandingRequest = [loadRequests objectForKey:path];

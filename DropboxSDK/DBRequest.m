@@ -57,6 +57,8 @@ static id networkRequestDelegate = nil;
 @synthesize resultData;
 @synthesize resultFilename;
 @synthesize error;
+@synthesize streamingData;
+@synthesize streamingFileSelector;
 
 - (NSString*)resultString {
     return [[[NSString alloc] 
@@ -129,7 +131,10 @@ static id networkRequestDelegate = nil;
             
             return;
         }
-    } else {
+    } else if (streamingFileSelector) {
+		streamingData = data;
+		[target performSelector:streamingFileSelector withObject:self];
+	} else {
         if (resultData == nil) {
             resultData = [NSMutableData new];
         }
