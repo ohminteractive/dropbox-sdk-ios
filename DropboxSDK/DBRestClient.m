@@ -229,16 +229,21 @@ NSString* kDBProtocolHTTPS = @"https";
 	[self loadPartialFile:path intoPath:destinationPath withRange:nil];
 }
 
-- (void)loadStreamingFile:(NSString *)path withRange:(NSRangePointer)range
+- (void)loadStreamingFile:(NSString *)path withRange:(NSRange)range
 {
     NSString* fullPath = [NSString stringWithFormat:@"/files/%@%@", root, path];
     
     NSMutableURLRequest* urlRequest = 
 	[self requestWithProtocol:kDBProtocolHTTPS host:kDBDropboxAPIContentHost path:fullPath parameters:nil];
 	
-	if (range) {
-		[urlRequest setValue:[NSString stringWithFormat:@"bytes=%ld-%ld", range->location, range->location + range->length] 
-		  forHTTPHeaderField:@"Range"];
+	if (range.location) {
+        NSString *rangeStr;
+        if (range.length) {
+            rangeStr = [NSString stringWithFormat:@"bytes=%ld-%ld", range.location, range.location + range.length];
+        } else {
+            rangeStr = [NSString stringWithFormat:@"bytes=%ld-", range.location];
+        }
+        [urlRequest setValue:rangeStr forHTTPHeaderField:@"Range"];
 	}
 	
     DBRequest* request = 
